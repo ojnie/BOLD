@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Works | BOLD{% endblock %}
+
+{% block content %}
+
+<section class="page">
+    <h1>Works</h1>
+    <p class="lead">Small programs I built while learning Python and Flask. Pick one to try it.</p>
+
+    <div class="card-grid">
+        <a href="/works/uppercase" class="glass work-card c-cyan">
+            <h3>Uppercase converter</h3>
+            <p>Type a sentence and turn every letter into capitals.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+
+        <a href="/works/area/circle" class="glass work-card c-magenta">
+            <h3>Circle area</h3>
+            <p>Give a radius and get the area of the circle.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+
+        <a href="/works/area/triangle" class="glass work-card c-violet">
+            <h3>Triangle area</h3>
+            <p>Give a base and a height and get the area of the triangle.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+
+        <a href="/works/linkedlist" class="glass work-card c-mint">
+            <h3>Linked list</h3>
+            <p>Insert, delete and search nodes, and watch the list change.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+    </div>
+</section>
+
+{% endblock %}

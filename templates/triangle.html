@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Area of Triangle | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Triangle area.</h1>
+    <p class="lead">Enter a base and a height to get the area of the triangle.</p>
+
+    <div class="glass tool">
+        <form action="/works/area/triangle" method="post" class="tool-form">
+            <label for="base">Enter the base:</label>
+            <input type="number" id="base" name="base" step="any" min="0" autocomplete="off" required>
+
+            <label for="height">Enter the height:</label>
+            <input type="number" id="height" name="height" step="any" min="0" autocomplete="off" required>
+
+            <input type="submit" value="Compute" class="btn">
+        </form>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if result is not none %}
+        <p class="result">Area of the triangle: {{ result }}</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

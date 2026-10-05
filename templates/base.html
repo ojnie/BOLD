@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}BOLD{% endblock %}</title>
+
+    <!-- skip the intro screen if it was already seen in this browser session -->
+    <script>try { if (sessionStorage.getItem('bold-entered')) document.documentElement.classList.add('no-loader'); } catch (e) {}</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- intro screen (shown once per visit; the ENTER click also unlocks the music) -->
+    <div id="loader" class="loader">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+        <div class="rings">
+            <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+            <div class="loader-name">BOLD</div>
+        </div>
+        <div class="loader-bar"><span></span></div>
+        <button id="enter-btn" class="btn" type="button">ENTER</button>
+    </div>
+
+    <header class="site-header">
+        <nav>
+            <a href="/" class="logo">BOLD</a>
+
+            {% set p = request.path %}
+            <ul>
+                <li><a href="/" class="{{ 'active' if p == '/' }}">Home</a></li>
+                <li><a href="/profile" class="{{ 'active' if p == '/profile' }}">Profile</a></li>
+                <li><a href="/works" class="{{ 'active' if p.startswith('/works') }}">Works</a></li>
+                <li><a href="/contact" class="{{ 'active' if p == '/contact' }}">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>© 2026 BOLD | Created by Jonie and friends(ChatGPT, Claude)</p>
+    </footer>
+
+    <a href="/games" class="try-me">TRY ME!</a>
+
+    <button id="music-toggle" class="music-toggle" type="button" aria-label="Music on or off" title="Music on / off">
+        <i></i><i></i><i></i><i></i>
+    </button>
+
+    <script src="{{ url_for('static', filename='js/music.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cursor.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nav.js') }}"></script>
+</body>
+</html>

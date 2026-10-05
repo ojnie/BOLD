@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Uppercase | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Uppercase.</h1>
+    <p class="lead">Type a string and turn it into capital letters.</p>
+
+    <div class="glass tool">
+        <form action="/works/uppercase" method="post" class="tool-form">
+            <label for="inputString">Enter a string:</label>
+            <input type="text" id="inputString" name="inputString" autocomplete="off" required>
+            <input type="submit" value="Convert" class="btn">
+        </form>
+
+        {% if result is not none %}
+        <p class="result">Converted string: {{ result }}</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

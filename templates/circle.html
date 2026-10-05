@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Area of Circle | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Circle area.</h1>
+    <p class="lead">Enter a radius to get the area of the circle.</p>
+
+    <div class="glass tool">
+        <form action="/works/area/circle" method="post" class="tool-form">
+            <label for="radius">Enter a radius:</label>
+            <input type="number" id="radius" name="radius" step="any" min="0" autocomplete="off" required>
+            <input type="submit" value="Compute" class="btn">
+        </form>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if result is not none %}
+        <p class="result">Area of the circle: {{ result }}</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

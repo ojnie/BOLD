@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Linked List | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Linked list.</h1>
+    <p class="lead">Add or remove nodes at either end, search for a value, or remove a matching value.</p>
+
+    <div class="glass tool">
+        <form action="/works/linkedlist" method="post" class="tool-form">
+            <label for="value">Value:</label>
+            <input type="text" id="value" name="value" autocomplete="off">
+
+            <div class="ll-buttons">
+                <button type="submit" name="action" value="insert_head" class="btn">Insert at head</button>
+                <button type="submit" name="action" value="insert_tail" class="btn">Insert at tail</button>
+                <button type="submit" name="action" value="delete" class="btn btn-ghost">Delete</button>
+                <button type="submit" name="action" value="search" class="btn btn-ghost">Search</button>
+                <button type="submit" name="action" value="clear" class="btn btn-ghost">Clear list</button>
+            </div>
+        </form>
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+            <p class="result">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <h2 class="ll-title">Current list</h2>
+
+        {% if items %}
+        <div class="ll-nodes">
+            <span class="ll-label">HEAD</span>
+            {% for item in items %}
+                <span class="ll-node">{{ item }}</span>
+                <span class="ll-arrow">&rarr;</span>
+            {% endfor %}
+            <span class="ll-label">None</span>
+        </div>
+        {% else %}
+        <p>The list is empty. Insert a value to get started.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
