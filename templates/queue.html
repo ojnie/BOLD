@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Queue / Dequeue | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Queue / Dequeue.</h1>
+    <p class="lead">A queue works first in, first out (FIFO): enqueue at the rear, dequeue from the front. This one is a strict deque, so it only ever touches the two ends and has no middle access.</p>
+
+    <div class="glass tool">
+        <form id="q-form" class="tool-form">
+            <label for="value">Value</label>
+            <input type="text" id="value" name="value" autocomplete="off">
+
+            <div class="ll-buttons">
+                <button type="submit" name="action" value="enqueue" class="btn">Enqueue (rear)</button>
+                <button type="submit" name="action" value="dequeue" class="btn">Dequeue (front)</button>
+            </div>
+            <div class="ll-buttons">
+                <button type="submit" name="action" value="add_front" class="btn btn-ghost">Add to front</button>
+                <button type="submit" name="action" value="remove_rear" class="btn btn-ghost">Remove from rear</button>
+                <button type="submit" name="action" value="peek" class="btn btn-ghost">Peek ends</button>
+                <button type="submit" name="action" value="clear" class="btn btn-ghost">Clear</button>
+            </div>
+        </form>
+
+        <div id="q-msg"></div>
+
+        <h2 class="ll-title" id="q-title">Current queue (0)</h2>
+
+        <div id="q-view"></div>
+    </div>
+</section>
+
+{% raw %}
+<script>
+(function () {
+    'use strict';
+
+    /* ---------- Deque (doubly linked) ---------- */
+    class DNode {
+        constructor(data) { this.data = data; this.prev = null; this.next = null; }
+    }
+
+    class Deque {
+        constructor() { this.front = null; this.rear = null; this.size = 0; }
+
+        isEmpty() { return this.front === null; }
+
+        addFront(data) {
+            const node = new DNode(data);
+            if (this.isEmpty()) {
+                this.front = node;
+                this.rear = node;
+            } else {
+                node.next = this.front;
+                this.front.prev = node;
+                this.front = node;
+            }
+            this.size += 1;
+        }
+
+        addRear(data) {
+            const node = new DNode(data);
+            if (this.isEmpty()) {
+                this.front = node;
+                this.rear = node;
+            } else {
+                node.prev = this.rear;
+                this.rear.next = node;
+                this.rear = node;
+            }
+            this.size += 1;
+        }
+
+        removeFront() {
+            if (this.isEmpty()) return null;
+            const node = this.front;
+            this.front = node.next;
+            if (this.front === null) this.rear = null;
+            else this.front.prev = null;
+            this.size -= 1;
+            return node.data;
+        }
+
+        removeRear() {
+            if (this.isEmpty()) return null;
+            const node = this.rear;
+            this.rear = node.prev;
+            if (this.rear === null) this.front = null;
+            else this.rear.next = null;
+            this.size -= 1;
+            return node.data;
+        }
+
+        peekFront() { return this.isEmpty() ? null : this.front.data; }
+        peekRear() { return this.isEmpty() ? null : this.rear.data; }
+
+        clear() { this.front = null; this.rear = null; this.size = 0; }
+
+        toArray() {
+            const items = [];
+            let current = this.front;
+            while (current) { items.push(current.data); current = current.next; }
+            return items;
+        }
+    }
+
+    /* ---------- Page wiring ---------- */
+    const KEY = 'bold-queue';
+    const queue = new Deque();
+
+    try {
+        const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+        saved.forEach(function (item) { queue.addRear(String(item)); });
+    } catch (err) { /* storage unavailable: start empty */ }
+
+    function save() {
+        try { localStorage.setItem(KEY, JSON.stringify(queue.toArray())); } catch (err) { /* ignore */ }
+    }
+
+    const form = document.getElementById('q-form');
+    const msgBox = document.getElementById('q-msg');
+    const title = document.getElementById('q-title');
+    const view = document.getElementById('q-view');
+
+    function say(text) {
+        msgBox.textContent = '';
+        const p = document.createElement('p');
+        p.className = 'result';
+        p.textContent = text;
+        msgBox.appendChild(p);
+    }
+
+    function span(cls, text) {
+        const s = document.createElement('span');
+        s.className = cls;
+        s.textContent = text;
+        return s;
+    }
+
+    function render() {
+        const items = queue.toArray();
+        title.textContent = 'Current queue (' + queue.size + ')';
+        view.textContent = '';
+
+        if (items.length === 0) {
+            const p = document.createElement('p');
+            p.textContent = 'The queue is empty. Enqueue a value to get started.';
+            view.appendChild(p);
+            return;
+        }
+
+        const nodes = document.createElement('div');
+        nodes.className = 'll-nodes';
+        nodes.appendChild(span('ll-label', 'FRONT'));
+        items.forEach(function (item, index) {
+            nodes.appendChild(span('ll-node', item));
+            if (index < items.length - 1) nodes.appendChild(span('ll-arrow', '\u2194'));
+        });
+        nodes.appendChild(span('ll-label', 'REAR'));
+        view.appendChild(nodes);
+    }
+
+    function handle(action) {
+        const valueInput = document.getElementById('value');
+        const value = valueInput.value.trim();
+
+        if ((action === 'enqueue' || action === 'add_front') && value === '') {
+            say('Please enter a value first.');
+        } else if (action === 'enqueue') {
+            queue.addRear(value);
+            say("Enqueued '" + value + "' at the rear.");
+        } else if (action === 'add_front') {
+            queue.addFront(value);
+            say("Added '" + value + "' at the front.");
+        } else if (action === 'dequeue') {
+            const removed = queue.removeFront();
+            if (removed === null) say('The queue is empty, nothing to dequeue.');
+            else say("Dequeued '" + removed + "' from the front (first in, first out).");
+        } else if (action === 'remove_rear') {
+            const removed = queue.removeRear();
+            if (removed === null) say('The queue is empty, nothing to remove.');
+            else say("Removed '" + removed + "' from the rear.");
+        } else if (action === 'peek') {
+            if (queue.isEmpty()) say('The queue is empty.');
+            else say("Front: '" + queue.peekFront() + "'   Rear: '" + queue.peekRear() + "'");
+        } else if (action === 'clear') {
+            queue.clear();
+            say('Queue cleared.');
+        }
+
+        valueInput.value = '';
+        save();
+        render();
+    }
+
+    form.querySelectorAll('button[name="action"]').forEach(function (button) {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            handle(button.value);
+        });
+    });
+    form.addEventListener('submit', function (e) { e.preventDefault(); });
+
+    render();
+})();
+</script>
+{% endraw %}
+{% endblock %}

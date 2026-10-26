@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Games | BOLD{% endblock %}
+
+{% block content %}
+
+<section class="page">
+    <h1>Games.</h1>
+    <p class="lead">Three small games starring the neon cat. Pick one and beat your best score.</p>
+
+    <a href="/games/fps" class="glass fps-promo">
+        <div>
+            <h3>BOLD STRIKE <span>NEW</span></h3>
+            <p>A Valorant-style FPS. Moving bots, four difficulties from Easy to &#128128;, and full sound effects.</p>
+        </div>
+        <span class="btn">Play &rarr;</span>
+    </a>
+
+    <div class="game-tabs">
+        <button type="button" class="game-tab active" data-game="flappy">Flappy Neon</button>
+        <button type="button" class="game-tab" data-game="snake">Nyan Snake</button>
+        <button type="button" class="game-tab" data-game="hurdle">Hurdle Cat</button>
+        <button type="button" id="sfx-toggle" class="sfx-toggle on">Sound FX: on</button>
+    </div>
+
+    <div class="glass game-box">
+        <div id="game-stage" class="game-stage no-cat-cursor">
+            <canvas id="game-canvas"></canvas>
+            <img id="game-cat" src="{{ url_for('static', filename='images/nyan-cat.gif') }}" alt="" draggable="false">
+        </div>
+        <p id="game-help" class="game-help"></p>
+    </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/games.js') }}"></script>
+
+{% endblock %}

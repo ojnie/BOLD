@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Area of Triangle | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Triangle Area.</h1>
+    <p class="lead">Enter a base and a height to get the area of the triangle.</p>
+
+    <div class="glass tool">
+        <form id="triangle-form" class="tool-form">
+            <label for="base">Enter the base:</label>
+            <input type="number" id="base" name="base" step="any" min="0" autocomplete="off" required>
+
+            <label for="height">Enter the height:</label>
+            <input type="number" id="height" name="height" step="any" min="0" autocomplete="off" required>
+
+            <input type="submit" value="Compute" class="btn">
+        </form>
+
+        <div id="triangle-out"></div>
+    </div>
+</section>
+
+{% raw %}
+<script>
+(function () {
+    'use strict';
+    document.getElementById('triangle-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var out = document.getElementById('triangle-out');
+        var rawBase = document.getElementById('base').value.trim();
+        var rawHeight = document.getElementById('height').value.trim();
+        var base = Number(rawBase);
+        var height = Number(rawHeight);
+        var p = document.createElement('p');
+
+        if (rawBase === '' || rawHeight === '' || !isFinite(base) || !isFinite(height)) {
+            p.className = 'error';
+            p.textContent = 'Please enter valid numbers for base and height.';
+        } else if (base < 0 || height < 0) {
+            p.className = 'error';
+            p.textContent = 'Base and height cannot be negative.';
+        } else {
+            p.className = 'result';
+            p.textContent = 'Area of the triangle: ' + Number((0.5 * base * height).toFixed(2));
+        }
+        out.textContent = '';
+        out.appendChild(p);
+    });
+})();
+</script>
+{% endraw %}
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Uppercase Converter | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Uppercase Converter.</h1>
+    <p class="lead">Type a string and turn it into capital letters.</p>
+
+    <div class="glass tool">
+        <form id="upper-form" class="tool-form">
+            <label for="inputString">Enter a string:</label>
+            <input type="text" id="inputString" name="inputString" autocomplete="off" required>
+            <input type="submit" value="Convert" class="btn">
+        </form>
+
+        <div id="upper-out"></div>
+    </div>
+</section>
+
+{% raw %}
+<script>
+(function () {
+    'use strict';
+    document.getElementById('upper-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var out = document.getElementById('upper-out');
+        var p = document.createElement('p');
+        p.className = 'result';
+        p.textContent = 'Converted string: ' + document.getElementById('inputString').value.toUpperCase();
+        out.textContent = '';
+        out.appendChild(p);
+    });
+})();
+</script>
+{% endraw %}
+{% endblock %}

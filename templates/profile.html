@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | BOLD{% endblock %}
+
+{% block content %}
+
+<section class="page">
+    <div class="glass profile-card">
+
+        <img src="{{ url_for('static', filename='image.jpg') }}" alt="Jonie" class="profile-pic"
+             onerror="this.style.display='none'">
+
+        <div>
+            <h1>About Me</h1>
+
+            <h2>Jonie R. Cayabyab</h2>
+
+            <p>
+                I am a student currently learning
+                programming and web development.
+                I enjoy exploring new ideas,
+                improving my coding skills,
+                and creating projects that help
+                me understand technology better.
+            </p>
+
+            <ul class="facts">
+                <li><span>Course</span>BS Computer Engineering</li>
+                <li><span>Motto</span>Keep learning, keep growing. Keep me.</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

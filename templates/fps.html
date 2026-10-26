@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Bold Strike | BOLD{% endblock %}
+
+{% block content %}
+
+<section class="page">
+    <a href="/games" class="back-link">&larr; Back to Games</a>
+    <h1>Bold Strike.</h1>
+    <p class="lead">A Valorant-style arena shooter. Hunt the bots down, aim for the head, and don't get hunted back.</p>
+
+    <div class="glass game-box">
+        <div id="fps-stage" class="fps-stage no-cat-cursor">
+            <canvas id="fps-canvas" width="512" height="288"></canvas>
+
+            <div id="fps-vignette"></div>
+            <div id="fps-dir"></div>
+            <div id="fps-cross"><i></i><i></i><i></i><i></i></div>
+            <div id="fps-hit"><i></i><i></i><i></i><i></i></div>
+            <canvas id="fps-minimap" width="120" height="120"></canvas>
+            <div id="fps-feed"></div>
+
+            <div id="fps-hud">
+                <div class="hud-top"><span id="fps-diff-label">EASY</span><span>KILLS <b id="fps-kills">0 / 10</b></span><span id="fps-time">00:00</span></div>
+                <div class="hud-hp"><span>HP</span><b id="fps-hp-num">100</b><div class="bar"><div id="fps-hp-bar"></div></div></div>
+                <div class="hud-ammo"><span>RIFLE</span><b id="fps-ammo">25 / &infin;</b></div>
+            </div>
+
+            <div id="fps-menu" class="fps-overlay">
+                <div class="fps-title">BOLD STRIKE</div>
+                <div class="fps-diffs">
+                    <button type="button" class="fps-diff active" data-diff="easy">Easy</button>
+                    <button type="button" class="fps-diff" data-diff="medium">Medium</button>
+                    <button type="button" class="fps-diff" data-diff="hard">Hard</button>
+                    <button type="button" class="fps-diff skull" data-diff="skull">&#128128;</button>
+                </div>
+                <p id="fps-diff-desc" class="fps-desc"></p>
+                <p id="fps-best" class="fps-best"></p>
+                <div class="fps-sliders">
+                    <label>Sensitivity <input id="fps-sens" type="range" min="0.2" max="3" step="0.05" value="1"> <b id="fps-sens-val">1.00</b></label>
+                    <label>Sound <input id="fps-vol" type="range" min="0" max="1" step="0.05" value="0.7"></label>
+                </div>
+                <div class="fps-row">
+                    <button id="fps-start" type="button" class="btn">START MATCH</button>
+                    <button type="button" class="btn btn-ghost fps-fs">Fullscreen</button>
+                </div>
+                <p class="fps-keys"><b>WASD</b> move &middot; <b>Mouse</b> aim &middot; <b>Click</b> shoot &middot; <b>Right click</b> scope &middot; <b>Shift</b> walk &middot; <b>R</b> reload &middot; <b>Esc</b> pause</p>
+                <p class="fps-keys">The site music pauses while a match is running.</p>
+            </div>
+
+            <div id="fps-pause" class="fps-overlay hidden">
+                <div class="fps-title">PAUSED</div>
+                <div class="fps-row">
+                    <button id="fps-resume" type="button" class="btn">RESUME</button>
+                    <button id="fps-quit" type="button" class="btn btn-ghost">Quit to menu</button>
+                    <button type="button" class="btn btn-ghost fps-fs">Fullscreen</button>
+                </div>
+                <p class="fps-keys">If the mouse does not capture, wait a second and click Resume again.</p>
+            </div>
+
+            <div id="fps-result" class="fps-overlay hidden">
+                <div id="fps-res-title" class="fps-title">VICTORY</div>
+                <div id="fps-res-stats" class="fps-stats"></div>
+                <p id="fps-res-note" class="fps-desc"></p>
+                <div class="fps-row">
+                    <button id="fps-again" type="button" class="btn">PLAY AGAIN</button>
+                    <button id="fps-to-menu" type="button" class="btn btn-ghost">Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/fps.js') }}"></script>
+
+{% endblock %}

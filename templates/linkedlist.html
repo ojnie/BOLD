@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Linked List | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Linked List.</h1>
+    <p class="lead">Append to the end, insert at any position (even the middle), and delete by value or by position. Positions start at 1.</p>
+
+    <div class="glass tool">
+        <form id="ll-form" class="tool-form">
+            <div class="field-row">
+                <div class="field">
+                    <label for="value">Value</label>
+                    <input type="text" id="value" name="value" autocomplete="off">
+                </div>
+                <div class="field">
+                    <label for="position">Position</label>
+                    <input type="number" id="position" name="position" min="1" step="1" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="ll-buttons">
+                <button type="submit" name="action" value="append" class="btn">Append</button>
+                <button type="submit" name="action" value="insert_head" class="btn">Insert at head</button>
+                <button type="submit" name="action" value="insert_at" class="btn">Insert at position</button>
+            </div>
+            <div class="ll-buttons">
+                <button type="submit" name="action" value="delete" class="btn btn-ghost">Delete value</button>
+                <button type="submit" name="action" value="delete_at" class="btn btn-ghost">Delete at position</button>
+                <button type="submit" name="action" value="search" class="btn btn-ghost">Search</button>
+                <button type="submit" name="action" value="clear" class="btn btn-ghost">Clear</button>
+            </div>
+        </form>
+
+        <div id="ll-msg"></div>
+
+        <h2 class="ll-title" id="ll-title">Current list (0)</h2>
+
+        <div id="ll-view"></div>
+    </div>
+</section>
+
+{% raw %}
+<script>
+(function () {
+    'use strict';
+
+    /* ---------- Linked list ---------- */
+    class ListNode {
+        constructor(data) { this.data = data; this.next = null; }
+    }
+
+    class LinkedList {
+        constructor() { this.head = null; }
+
+        length() {
+            let count = 0;
+            let current = this.head;
+            while (current) { count += 1; current = current.next; }
+            return count;
+        }
+
+        insertHead(data) {
+            const node = new ListNode(data);
+            node.next = this.head;
+            this.head = node;
+        }
+
+        insertTail(data) {
+            const node = new ListNode(data);
+            if (this.head === null) { this.head = node; return; }
+            let current = this.head;
+            while (current.next) current = current.next;
+            current.next = node;
+        }
+
+        insertAt(position, data) {
+            if (position < 1 || position > this.length() + 1) return false;
+            if (position === 1) { this.insertHead(data); return true; }
+            let current = this.head;
+            for (let i = 0; i < position - 2; i++) current = current.next;
+            const node = new ListNode(data);
+            node.next = current.next;
+            current.next = node;
+            return true;
+        }
+
+        remove(data) {
+            let current = this.head;
+            let previous = null;
+            while (current) {
+                if (current.data === data) {
+                    if (previous) previous.next = current.next;
+                    else this.head = current.next;
+                    return true;
+                }
+                previous = current;
+                current = current.next;
+            }
+            return false;
+        }
+
+        deleteAt(position) {
+            if (position < 1 || position > this.length()) return null;
+            if (position === 1) {
+                const removed = this.head;
+                this.head = removed.next;
+                return removed.data;
+            }
+            let current = this.head;
+            for (let i = 0; i < position - 2; i++) current = current.next;
+            const removed = current.next;
+            current.next = removed.next;
+            return removed.data;
+        }
+
+        search(data) {
+            let current = this.head;
+            let position = 1;
+            while (current) {
+                if (current.data === data) return position;
+                current = current.next;
+                position += 1;
+            }
+            return -1;
+        }
+
+        toArray() {
+            const items = [];
+            let current = this.head;
+            while (current) { items.push(current.data); current = current.next; }
+            return items;
+        }
+    }
+
+    /* ---------- Page wiring ---------- */
+    const KEY = 'bold-linkedlist';
+    const list = new LinkedList();
+
+    try {
+        const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+        saved.forEach(function (item) { list.insertTail(String(item)); });
+    } catch (err) { /* storage unavailable: start empty */ }
+
+    function save() {
+        try { localStorage.setItem(KEY, JSON.stringify(list.toArray())); } catch (err) { /* ignore */ }
+    }
+
+    const form = document.getElementById('ll-form');
+    const msgBox = document.getElementById('ll-msg');
+    const title = document.getElementById('ll-title');
+    const view = document.getElementById('ll-view');
+
+    function say(text) {
+        msgBox.textContent = '';
+        const p = document.createElement('p');
+        p.className = 'result';
+        p.textContent = text;
+        msgBox.appendChild(p);
+    }
+
+    function span(cls, text) {
+        const s = document.createElement('span');
+        s.className = cls;
+        s.textContent = text;
+        return s;
+    }
+
+    function render() {
+        const items = list.toArray();
+        title.textContent = 'Current list (' + items.length + ')';
+        view.textContent = '';
+
+        if (items.length === 0) {
+            const p = document.createElement('p');
+            p.textContent = 'The list is empty. Append a value to get started.';
+            view.appendChild(p);
+            return;
+        }
+
+        const nodes = document.createElement('div');
+        nodes.className = 'll-nodes';
+        nodes.appendChild(span('ll-label', 'HEAD'));
+        items.forEach(function (item, index) {
+            const node = span('ll-node', item);
+            const small = document.createElement('small');
+            small.textContent = String(index + 1);
+            node.appendChild(small);
+            nodes.appendChild(node);
+            nodes.appendChild(span('ll-arrow', '\u2192'));
+        });
+        nodes.appendChild(span('ll-label', 'None'));
+        view.appendChild(nodes);
+    }
+
+    function handle(action) {
+        const valueInput = document.getElementById('value');
+        const positionInput = document.getElementById('position');
+        const value = valueInput.value.trim();
+        const positionText = positionInput.value.trim();
+        const length = list.length();
+
+        let position = null;
+        if (positionText !== '') {
+            if (!/^[+-]?\d+$/.test(positionText)) {
+                say('Position must be a whole number.');
+                return;
+            }
+            position = parseInt(positionText, 10);
+        }
+
+        if (action === 'clear') {
+            list.head = null;
+            say('List cleared.');
+        } else if (['append', 'insert_head', 'insert_at', 'delete', 'search'].indexOf(action) !== -1 && value === '') {
+            say('Please enter a value first.');
+        } else if (action === 'append') {
+            list.insertTail(value);
+            say("Appended '" + value + "' at the end (position " + (length + 1) + ').');
+        } else if (action === 'insert_head') {
+            list.insertHead(value);
+            say("Inserted '" + value + "' at the head (position 1).");
+        } else if (action === 'insert_at') {
+            if (position === null) say('Enter a position to insert at.');
+            else if (list.insertAt(position, value)) say("Inserted '" + value + "' at position " + position + '.');
+            else say('Position must be between 1 and ' + (length + 1) + '.');
+        } else if (action === 'delete') {
+            if (list.remove(value)) say("Deleted '" + value + "'.");
+            else say("'" + value + "' was not found in the list.");
+        } else if (action === 'delete_at') {
+            if (position === null) {
+                say('Enter a position to delete.');
+            } else {
+                const removed = list.deleteAt(position);
+                if (removed === null) say(length ? 'Position must be between 1 and ' + length + '.' : 'The list is empty.');
+                else say("Deleted '" + removed + "' at position " + position + '.');
+            }
+        } else if (action === 'search') {
+            const found = list.search(value);
+            if (found === -1) say("'" + value + "' was not found in the list.");
+            else say("'" + value + "' found at position " + found + '.');
+        }
+
+        valueInput.value = '';
+        positionInput.value = '';
+        save();
+        render();
+    }
+
+    form.querySelectorAll('button[name="action"]').forEach(function (button) {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            handle(button.value);
+        });
+    });
+    form.addEventListener('submit', function (e) { e.preventDefault(); });
+
+    render();
+})();
+</script>
+{% endraw %}
+{% endblock %}

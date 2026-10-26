@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Area of Circle | BOLD{% endblock %}
+
+{% block content %}
+<section class="page page-narrow">
+    {% include "works_menu.html" %}
+
+    <h1>Circle Area.</h1>
+    <p class="lead">Enter a radius to get the area of the circle.</p>
+
+    <div class="glass tool">
+        <form id="circle-form" class="tool-form">
+            <label for="radius">Enter a radius:</label>
+            <input type="number" id="radius" name="radius" step="any" min="0" autocomplete="off" required>
+            <input type="submit" value="Compute" class="btn">
+        </form>
+
+        <div id="circle-out"></div>
+    </div>
+</section>
+
+{% raw %}
+<script>
+(function () {
+    'use strict';
+    document.getElementById('circle-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var out = document.getElementById('circle-out');
+        var raw = document.getElementById('radius').value.trim();
+        var radius = Number(raw);
+        var p = document.createElement('p');
+
+        if (raw === '' || !isFinite(radius)) {
+            p.className = 'error';
+            p.textContent = 'Please enter a valid number.';
+        } else if (radius < 0) {
+            p.className = 'error';
+            p.textContent = 'Radius cannot be negative.';
+        } else {
+            p.className = 'result';
+            p.textContent = 'Area of the circle: ' + Number((Math.PI * radius * radius).toFixed(2));
+        }
+        out.textContent = '';
+        out.appendChild(p);
+    });
+})();
+</script>
+{% endraw %}
+{% endblock %}

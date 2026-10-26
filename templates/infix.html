@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Infix to Postfix | BOLD{% endblock %}
+
+{% block content %}
+<section class="page">
+    {% include "works_menu.html" %}
+
+    <h1>Infix to Postfix.</h1>
+    <p class="lead">Type an infix expression and see it converted to postfix using a stack, one step at a time. Supports + - * / % ^ and parentheses.</p>
+
+    <div class="glass tool">
+        <form id="infix-form" class="tool-form">
+            <label for="expression">Infix expression:</label>
+            <input type="text" id="expression" name="expression" placeholder="(A+B)*C-D/E^F" autocomplete="off" required>
+            <input type="submit" value="Convert" class="btn">
+        </form>
+
+        <div id="infix-out"></div>
+    </div>
+</section>
+
+{% raw %}
+<script>
+(function () {
+    'use strict';
+
+    /* ---------- Stack ---------- */
+    class Stack {
+        constructor() { this.items = []; }
+        push(item) { this.items.push(item); }
+        pop() { return this.items.pop(); }
+        peek() { return this.items.length ? this.items[this.items.length - 1] : null; }
+        isEmpty() { return this.items.length === 0; }
+        snapshot() { return this.items.join(' '); }
+    }
+
+    /* ---------- Infix to postfix ---------- */
+    const PRECEDENCE = new Map([['+', 1], ['-', 1], ['*', 2], ['/', 2], ['%', 2], ['^', 3]]);
+    const RIGHT_ASSOCIATIVE = new Set(['^']);
+
+    function isAlnum(ch) { return /^[\p{L}\p{N}]$/u.test(ch); }
+    function isDigit(ch) { return /^[0-9]$/.test(ch); }
+
+    function tokenize(expression) {
+        const tokens = [];
+        let i = 0;
+        let expectOperand = true;
+        while (i < expression.length) {
+            const ch = expression[i];
+            if (/\s/.test(ch)) {
+                i += 1;
+            } else if (isAlnum(ch) || ch === '.' ||
+                       (ch === '-' && expectOperand && i + 1 < expression.length &&
+                        (isDigit(expression[i + 1]) || expression[i + 1] === '.'))) {
+                let j = i + 1;
+                while (j < expression.length && (isAlnum(expression[j]) || expression[j] === '.')) j += 1;
+                tokens.push(expression.slice(i, j));
+                i = j;
+                expectOperand = false;
+            } else if (PRECEDENCE.has(ch)) {
+                if (expectOperand) throw new Error("Operator '" + ch + "' is missing an operand before it.");
+                tokens.push(ch);
+                i += 1;
+                expectOperand = true;
+            } else if (ch === '(') {
+                if (!expectOperand) throw new Error("Missing operator before '('.");
+                tokens.push(ch);
+                i += 1;
+            } else if (ch === ')') {
+                if (expectOperand) throw new Error("Missing operand before ')'.");
+                tokens.push(ch);
+                i += 1;
+            } else {
+                throw new Error("Invalid character '" + ch + "'.");
+            }
+        }
+        if (tokens.length === 0) throw new Error('Please enter an expression.');
+        if (expectOperand) throw new Error('The expression ends with an operator.');
+        return tokens;
+    }
+
+    function infixToPostfix(expression) {
+        const tokens = tokenize(expression);
+        const stack = new Stack();
+        const output = [];
+        const steps = [];
+        let action;
+        for (const token of tokens) {
+            if (!PRECEDENCE.has(token) && token !== '(' && token !== ')') {
+                output.push(token);
+                action = 'Operand: add to output';
+            } else if (token === '(') {
+                stack.push(token);
+                action = "Push '('";
+            } else if (token === ')') {
+                while (!stack.isEmpty() && stack.peek() !== '(') output.push(stack.pop());
+                if (stack.isEmpty()) throw new Error("Mismatched parentheses: extra ')'.");
+                stack.pop();
+                action = "Pop until '(' and discard it";
+            } else {
+                while (!stack.isEmpty() && stack.peek() !== '(' &&
+                       (PRECEDENCE.get(stack.peek()) > PRECEDENCE.get(token) ||
+                        (PRECEDENCE.get(stack.peek()) === PRECEDENCE.get(token) && !RIGHT_ASSOCIATIVE.has(token)))) {
+                    output.push(stack.pop());
+                }
+                stack.push(token);
+                action = 'Operator: pop higher or equal precedence, then push';
+            }
+            steps.push({ token: token, action: action, stack: stack.snapshot(), output: output.join(' ') });
+        }
+        while (!stack.isEmpty()) {
+            const top = stack.pop();
+            if (top === '(') throw new Error("Mismatched parentheses: missing ')'.");
+            output.push(top);
+            steps.push({ token: '', action: "End: pop '" + top + "'", stack: stack.snapshot(), output: output.join(' ') });
+        }
+        return { output: output, steps: steps };
+    }
+
+    const NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
+
+    function evaluatePostfix(postfix) {
+        const stack = new Stack();
+        for (const token of postfix) {
+            if (PRECEDENCE.has(token)) {
+                if (stack.items.length < 2) return null;
+                const right = stack.pop();
+                const left = stack.pop();
+                if (token === '+') stack.push(left + right);
+                else if (token === '-') stack.push(left - right);
+                else if (token === '*') stack.push(left * right);
+                else if (token === '/') { if (right === 0) return null; stack.push(left / right); }
+                else if (token === '%') {
+                    if (right === 0) return null;
+                    stack.push(((left % right) + right) % right);   /* same sign rule as Python */
+                }
+                else stack.push(Math.pow(left, right));
+            } else {
+                if (!NUMBER.test(token)) return null;
+                stack.push(parseFloat(token));
+            }
+        }
+        if (stack.isEmpty()) return null;
+        const value = stack.pop();
+        return Number.isInteger(value) ? value : Number(value.toFixed(6));
+    }
+
+    /* ---------- Page wiring ---------- */
+    function line(cls, text) {
+        const p = document.createElement('p');
+        p.className = cls;
+        p.textContent = text;
+        return p;
+    }
+
+    document.getElementById('infix-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const out = document.getElementById('infix-out');
+        out.textContent = '';
+        const expression = document.getElementById('expression').value.trim();
+
+        let result;
+        try {
+            result = infixToPostfix(expression);
+        } catch (err) {
+            out.appendChild(line('error', err.message));
+            return;
+        }
+
+        const postfix = result.output.join(' ');
+        const value = evaluatePostfix(result.output);
+
+        out.appendChild(line('result', 'Postfix: ' + postfix));
+        if (value !== null) out.appendChild(line('result', 'Value: ' + value));
+
+        const wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        const table = document.createElement('table');
+        table.className = 'steps';
+
+        const head = table.createTHead().insertRow();
+        ['Token', 'What happens', 'Stack', 'Output'].forEach(function (name) {
+            const th = document.createElement('th');
+            th.textContent = name;
+            head.appendChild(th);
+        });
+
+        const body = table.createTBody();
+        result.steps.forEach(function (step) {
+            const row = body.insertRow();
+            [step.token, step.action, step.stack, step.output].forEach(function (text) {
+                row.insertCell().textContent = text;
+            });
+        });
+
+        wrap.appendChild(table);
+        out.appendChild(wrap);
+    });
+})();
+</script>
+{% endraw %}
+{% endblock %}

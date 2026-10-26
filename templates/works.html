@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Works | BOLD{% endblock %}
+
+{% block content %}
+
+<section class="page">
+    <h1>Works.</h1>
+    <p class="lead">Small programs I built while learning Python and Flask. Pick one to try it.</p>
+
+    <div class="card-grid">
+        <a href="/works/uppercase" class="glass work-card c-cyan">
+            <h3>Uppercase Converter</h3>
+            <p>Type a sentence and turn every letter into capitals.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+
+        <a href="/works/area/circle" class="glass work-card c-magenta">
+            <h3>Circle Area</h3>
+            <p>Give a radius and get the area of the circle.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+
+        <a href="/works/area/triangle" class="glass work-card c-violet">
+            <h3>Triangle Area</h3>
+            <p>Give a base and a height and get the area of the triangle.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+
+        <a href="/works/linkedlist" class="glass work-card c-mint">
+            <h3>Linked List</h3>
+            <p>Append, insert at any position and delete by value or position.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+
+        <a href="/works/infix" class="glass work-card c-amber">
+            <h3>Infix to Postfix</h3>
+            <p>Convert an expression with a stack and watch each step.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+
+        <a href="/works/queue" class="glass work-card c-rose">
+            <h3>Queue / Dequeue</h3>
+            <p>First in, first out. Enqueue at the rear, dequeue from the front.</p>
+            <span class="open">Open &rarr;</span>
+        </a>
+    </div>
+</section>
+
+{% endblock %}
